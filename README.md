@@ -2,6 +2,9 @@
 
 Find the home folder an AI coding agent uses, without reading contents.
 
+<img width="1400" height="850" alt="agents_homedir-demo" src="https://github.com/user-attachments/assets/8bccd83b-a81b-4f8e-9414-5eee67a127b4" />
+
+
 ## Installation
 
 Use Ruby 3.2 or newer. The gem ships with one runtime dependency: Zeitwerk 2.8.
