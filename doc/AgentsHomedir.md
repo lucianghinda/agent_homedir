@@ -1,0 +1,60 @@
+# Module AgentsHomedir <a id="module-AgentsHomedir"></a>
+
+|  |  |
+| --- | --- |
+| **Defined in** | lib/agents_homedir.rb, lib/agents_homedir/agent.rb, lib/agents_homedir/error.rb, lib/agents_homedir/version.rb, lib/agents_homedir/registry.rb, lib/agents_homedir/resolver.rb, lib/agents_homedir/unknown_agent.rb, lib/agents_homedir/home_not_resolvable.rb |
+
+## Constants
+### `DEFAULT_RESOLVER_MONITOR` <a id="constant-DEFAULT_RESOLVER_MONITOR"></a> <a id="DEFAULT_RESOLVER_MONITOR-constant"></a>
+Not documented.
+
+### `VERSION` <a id="constant-VERSION"></a> <a id="VERSION-constant"></a>
+Not documented.
+
+## Public Class Methods
+### `[] (name)` <a id="method-c--5B-5D"></a> <a id="[]-class_method"></a>
+Returns the named agent from the default registry.
+- **@param** `name` [String, Symbol]
+- **@raise** [AgentsHomedir::UnknownAgent] if the name is not registered
+- **@return** [AgentsHomedir::Agent]
+
+### `agents()` <a id="method-c-agents"></a> <a id="agents-class_method"></a>
+Returns all known agents in registry order.
+- **@return** [Array<AgentsHomedir::Agent>]
+
+### `default_resolver()` <a id="method-c-default_resolver"></a> <a id="default_resolver-class_method"></a>
+Returns the memoized default resolver built from the current environment. ENV
+and HOME are snapshotted on first access and reused for process lifetime.
+- **@raise** [ArgumentError] if the current host OS is unsupported
+- **@return** [AgentsHomedir::Resolver]
+
+### `home(name)` <a id="method-c-home"></a> <a id="home-class_method"></a>
+Returns the configured home directory for the named agent.
+- **@param** `name` [String, Symbol]
+- **@raise** [AgentsHomedir::UnknownAgent] if the name is not registered
+- **@raise** [AgentsHomedir::HomeNotResolvable] if HOME is missing, blank, or not absolute
+- **@return** [Pathname]
+
+### `installed()` <a id="method-c-installed"></a> <a id="installed-class_method"></a>
+Returns currently installed agents in registry order.
+- **@raise** [AgentsHomedir::HomeNotResolvable] if HOME is missing, blank, or not absolute
+- **@return** [Array<AgentsHomedir::Agent>]
+
+### `installed?(name)` <a id="method-c-installed-3F"></a> <a id="installed?-class_method"></a>
+Returns whether the named agent is currently installed.
+- **@param** `name` [String, Symbol]
+- **@raise** [AgentsHomedir::UnknownAgent] if the name is not registered
+- **@raise** [AgentsHomedir::HomeNotResolvable] if HOME is missing, blank, or not absolute
+- **@return** [Boolean]
+
+### `names()` <a id="method-c-names"></a> <a id="names-class_method"></a>
+Returns all known agent names in registry order.
+- **@return** [Array<Symbol>]
+
+# Documentation
+
+- [AgentsHomedir/Agent.md](AgentsHomedir/Agent.md)
+- [AgentsHomedir/Error.md](AgentsHomedir/Error.md)
+- [AgentsHomedir/HomeNotResolvable.md](AgentsHomedir/HomeNotResolvable.md)
+- [AgentsHomedir/Resolver.md](AgentsHomedir/Resolver.md)
+- [AgentsHomedir/UnknownAgent.md](AgentsHomedir/UnknownAgent.md)

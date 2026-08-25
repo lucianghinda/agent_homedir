@@ -2,21 +2,28 @@
 # frozen_string_literal: true
 
 require "rbconfig"
+require "rubygems/package"
 
 class ReleasePreparer
   DEFAULT_RUNNER = lambda do |command, working_directory|
     system(*command, chdir: working_directory)
+  end
+  DEFAULT_BUILDER = lambda do |working_directory|
+    specification = Gem::Specification.load(File.join(working_directory, "agents_homedir.gemspec"))
+    Dir.chdir(working_directory) { Gem::Package.build(specification) }
   end
 
   def initialize(
     root: File.expand_path("..", __dir__),
     ruby: RbConfig.ruby,
     runner: DEFAULT_RUNNER,
+    builder: DEFAULT_BUILDER,
     stderr: $stderr
   )
     @root = root
     @ruby = ruby
     @runner = runner
+    @builder = builder
     @stderr = stderr
   end
 
@@ -28,19 +35,21 @@ class ReleasePreparer
       return false
     end
 
-    true
+    return true if builder.call(root)
+
+    stderr.puts "Release preparation failed: build agents_homedir.gemspec"
+    false
   end
 
   private
 
-  attr_reader :root, :ruby, :runner, :stderr
+  attr_reader :root, :ruby, :runner, :builder, :stderr
 
   def commands
     [
       [ruby, "-S", "bundle", "exec", "rake", "test"],
       [ruby, "-S", "bundle", "exec", "rake", "yard"],
-      [ruby, File.join(root, "bin", "generate_llm.rb")],
-      [ruby, "-S", "gem", "build", "agents_homedir.gemspec"]
+      [ruby, File.join(root, "bin", "generate_llm.rb")]
     ]
   end
 end

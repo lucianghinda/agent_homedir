@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   }
 
   spec.files         = Dir.chdir(File.expand_path("..", __FILE__)) do
-    (%w[LICENSE.txt README.md] + Dir.glob("lib/**/*.rb")).sort
+    (%w[LICENSE.txt README.md llm.txt] + Dir.glob("doc/**/*.{csv,md}") + Dir.glob("lib/**/*.rb")).sort
   end
   spec.require_paths = ["lib"]
   spec.add_dependency "zeitwerk", "~> 2.8"
@@ -32,4 +32,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", ">= 2.0", "< 5"
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "rake", "~> 13.0"
+  spec.add_development_dependency "yard", "~> 0.9"
+  spec.add_development_dependency "yard-markdown", "~> 0.9"
 end

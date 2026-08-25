@@ -13,6 +13,14 @@ class PackagingTest < Minitest::Test
   EXPECTED_PACKAGED_FILES = %w[
     LICENSE.txt
     README.md
+    doc/AgentsHomedir.md
+    doc/AgentsHomedir/Agent.md
+    doc/AgentsHomedir/Error.md
+    doc/AgentsHomedir/HomeNotResolvable.md
+    doc/AgentsHomedir/Resolver.md
+    doc/AgentsHomedir/UnknownAgent.md
+    doc/README.md
+    doc/index.csv
     lib/agents_homedir.rb
     lib/agents_homedir/agent.rb
     lib/agents_homedir/error.rb
@@ -21,6 +29,7 @@ class PackagingTest < Minitest::Test
     lib/agents_homedir/resolver.rb
     lib/agents_homedir/unknown_agent.rb
     lib/agents_homedir/version.rb
+    llm.txt
   ].freeze
 
   def test_gemspec_exposes_modern_packaging_metadata
@@ -41,9 +50,16 @@ class PackagingTest < Minitest::Test
 
     development_dependencies = spec.dependencies.select { |dependency| dependency.type == :development }.to_h { |dependency| [dependency.name, dependency.requirement.to_s] }
 
-    assert_equal ">= 2.0, < 5", development_dependencies["bundler"]
-    assert_equal "~> 13.0", development_dependencies["rake"]
-    assert_equal "~> 5.0", development_dependencies["minitest"]
+    assert_equal(
+      {
+        "bundler" => ">= 2.0, < 5",
+        "minitest" => "~> 5.0",
+        "rake" => "~> 13.0",
+        "yard" => "~> 0.9",
+        "yard-markdown" => "~> 0.9"
+      },
+      development_dependencies
+    )
   end
 
   def test_gemspec_manifest_is_explicit_and_buildable_without_git_repository
@@ -121,6 +137,15 @@ class PackagingTest < Minitest::Test
       end
       assert status.success?, "expected installed gem require to succeed, stderr: #{stderr.inspect}, stdout: #{stdout.inspect}"
     end
+  end
+
+  def test_llm_document_links_only_to_packaged_files
+    spec = Gem::Specification.load(File.expand_path("../agents_homedir.gemspec", __dir__))
+    llm_document = File.read(File.expand_path("../llm.txt", __dir__))
+    linked_files = llm_document.scan(%r{\]\((doc/[^)]+)\)}).flatten
+
+    refute_empty linked_files
+    linked_files.each { |path| assert_includes spec.files, path }
   end
 
   def test_travis_configuration_is_removed

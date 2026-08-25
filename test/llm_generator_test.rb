@@ -65,6 +65,7 @@ class LlmGeneratorTest < Minitest::Test
     Dir.mktmpdir do |root|
       main_document = File.join(root, "doc", "AgentsHomedir.md")
       FileUtils.mkdir_p(File.join(root, "doc", "AgentsHomedir", "Nested"))
+      FileUtils.mkdir_p(File.join(root, "doc", "docs", "superpowers"))
       File.write(main_document, <<~MARKDOWN)
         # Module: AgentsHomedir
 
@@ -77,6 +78,8 @@ class LlmGeneratorTest < Minitest::Test
       File.write(File.join(root, "doc", "AgentsHomedir", "Registry.md"), "Registry")
       File.write(File.join(root, "doc", "AgentsHomedir", "Agent.md"), "Agent")
       File.write(File.join(root, "doc", "AgentsHomedir", "Nested", "Resolver.md"), "Resolver")
+      File.write(File.join(root, "doc", "README.md"), "Project README")
+      File.write(File.join(root, "doc", "docs", "superpowers", "plan.md"), "Release plan")
 
       yield root, main_document
     end

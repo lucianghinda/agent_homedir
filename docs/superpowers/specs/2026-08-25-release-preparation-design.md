@@ -18,8 +18,8 @@ generator writes `llm.txt` even though that repository now tracks `llm.md`.
 - Generate Markdown API documentation from the Ruby source.
 - Generate a deterministic, idempotent root-level `llm.txt` whose API links
   resolve into the generated `doc/` tree.
-- Package `llm.txt` with the gem while keeping the generated `doc/` tree and
-  release scripts out of the gem.
+- Package `llm.txt` and its generated `doc/` link targets with the gem while
+  keeping release scripts out of the gem.
 - Fail immediately when tests, documentation generation, LLM generation, or
   gem building fails.
 
@@ -28,16 +28,19 @@ generator writes `llm.txt` even though that repository now tracks `llm.md`.
 - Publishing the gem to RubyGems.
 - Changing the gem version or maintaining a changelog.
 - Adding runtime dependencies.
-- Committing the generated `doc/` tree.
 
 ## Architecture
 
 ### API documentation
 
 YARD and `yard-markdown` are development dependencies. `.yardopts` defines
-Markdown output under `doc/`, includes protected APIs, excludes private APIs,
-and uses `README.md` as the extra landing-page content. A YARD Rake task exposes
-this as `bundle exec rake yard`.
+Markdown output under `doc/`, includes protected APIs, excludes private APIs
+and internal planning documents, and uses `README.md` as the extra landing-page
+content. A YARD Rake task removes stale output before exposing clean generation
+as `bundle exec rake yard`.
+
+`yard-markdown` stays on its current `0.9.x` release line. This produces clean,
+stable Markdown and declares the RDoc dependency Ruby 4 needs explicitly.
 
 ### LLM document generator
 
@@ -60,17 +63,21 @@ in order:
 1. `bundle exec rake test`
 2. `bundle exec rake yard`
 3. `bin/generate_llm.rb` using the active Ruby interpreter
-4. `gem build agents_homedir.gemspec`
+4. Build `agents_homedir.gemspec` with RubyGems' in-process `Gem::Package` API.
 
 Each command inherits normal output. The first failed command stops the
 pipeline, reports the command, and makes the entrypoint exit unsuccessfully.
-The script only builds the gem; it never publishes it.
+The build stays in the release script's Ruby process, preventing the system
+`gem` launcher and globally installed documentation gems from leaking into the
+release process. The script only builds the gem; it never publishes it.
 
 ## Packaging
 
-The explicit gemspec manifest gains `llm.txt`. It continues to omit `bin/`,
-`test/`, configuration, and the generated `doc/` directory. YARD dependencies
-are development-only and therefore do not affect users of the gem.
+The explicit gemspec manifest gains `llm.txt` and the generated Markdown/CSV
+files under `doc/`, ensuring every relative link in `llm.txt` resolves in a
+clean checkout and an installed gem. It continues to omit `bin/`, `test/`, and
+configuration. YARD dependencies are development-only and therefore do not
+affect users of the gem.
 
 ## Testing
 
@@ -88,6 +95,6 @@ and inspects the resulting gem contents.
 - YARD output can change between dependency versions. Version requirements and
   the lockfile keep local generation reproducible within the selected release
   line.
-- `llm.txt` is generated, so API changes can make it stale until release
-  preparation is run. The release entrypoint always regenerates it before the
-  gem is built.
+- `llm.txt` and `doc/` are generated, so API changes can make tracked documents
+  stale until release preparation is run. The release entrypoint always cleans
+  and regenerates both before the gem is built.

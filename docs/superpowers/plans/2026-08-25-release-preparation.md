@@ -4,7 +4,7 @@
 
 **Goal:** Add a self-contained, tested release command that generates Markdown API documentation and `llm.txt` before building the gem.
 
-**Architecture:** Two testable Ruby executables separate document transformation from command orchestration. YARD produces ignored Markdown API files, the generator creates the tracked and packaged `llm.txt`, and the release entrypoint runs validation and build steps in a fail-fast sequence.
+**Architecture:** Two testable Ruby executables separate document transformation from command orchestration. YARD produces tracked Markdown API files, the generator creates the tracked and packaged `llm.txt`, and the release entrypoint runs validation and build steps in a fail-fast sequence.
 
 **Tech Stack:** Ruby 3.2+, Minitest, Rake, YARD, yard-markdown, RubyGems.
 
@@ -13,6 +13,7 @@
 ## File map
 
 - Create `.yardopts`: deterministic Markdown API-documentation configuration.
+- Modify `.gitignore`: track generated API documentation.
 - Create `bin/generate_llm.rb`: idempotent API-index and `llm.txt` generator.
 - Create `bin/prepare_release`: fail-fast release command orchestrator.
 - Create `test/llm_generator_test.rb`: document-generation behavior.
@@ -23,6 +24,7 @@
 - Modify `Gemfile.lock`: lock the added development dependencies.
 - Modify `test/packaging_test.rb`: require `llm.txt` in the gem manifest.
 - Create `llm.txt`: generated API entry document.
+- Create `doc/**/*.{csv,md}`: generated and packaged link targets for `llm.txt`.
 
 ### Task 1: Test and implement deterministic LLM document generation
 
@@ -91,14 +93,14 @@ that a successful call runs these commands in order:
 [
   [ruby, "-S", "bundle", "exec", "rake", "test"],
   [ruby, "-S", "bundle", "exec", "rake", "yard"],
-  [ruby, File.join(root, "bin/generate_llm.rb")],
-  [ruby, "-S", "gem", "build", "agents_homedir.gemspec"]
+  [ruby, File.join(root, "bin/generate_llm.rb")]
 ]
 ```
 
-Add a failure test whose runner returns false for the YARD command. Assert the
-generator and build commands are not run and stderr identifies the failed
-command.
+After those commands, inject a builder and assert it receives the repository
+root. Add a failure test whose runner returns false for the YARD command.
+Assert the generator and builder are not run and stderr identifies the failed
+command. Add a separate failing-builder test.
 
 - [ ] **Step 2: Run the tests and verify RED**
 
@@ -108,10 +110,11 @@ Expected: an error because `bin/prepare_release` does not exist.
 
 - [ ] **Step 3: Implement the minimal orchestrator**
 
-Define `ReleasePreparer` with injected `root`, `ruby`, `runner`, and `stderr`.
-Build the four command arrays, run each from `root`, and return false immediately
-after the first failed command. Make the file executable and guard CLI execution
-with `if $PROGRAM_NAME == __FILE__`.
+Define `ReleasePreparer` with injected `root`, `ruby`, `runner`, `builder`, and
+`stderr`. Build the three command arrays, run each from `root`, and return false
+immediately after the first failed command. The default builder loads the
+gemspec and calls `Gem::Package.build` in-process. Make the file executable and
+guard CLI execution with `if $PROGRAM_NAME == __FILE__`.
 
 - [ ] **Step 4: Run the focused tests and verify GREEN**
 
@@ -130,8 +133,8 @@ Expected: all release-orchestrator tests pass with no warnings.
 
 - [ ] **Step 1: Update the packaging test before the manifest**
 
-Add `llm.txt` to `EXPECTED_PACKAGED_FILES` and assert the generated `doc/` tree
-and release scripts remain absent.
+Add `llm.txt` and its generated `doc/` link targets to
+`EXPECTED_PACKAGED_FILES`; assert release scripts remain absent.
 
 - [ ] **Step 2: Run the packaging test and verify RED**
 
@@ -141,9 +144,10 @@ Expected: manifest mismatch because `llm.txt` is not yet packaged.
 
 - [ ] **Step 3: Add development dependencies and YARD configuration**
 
-Add development requirements `yard ~> 0.9` and `yard-markdown ~> 0.5` to the
-gemspec, require `yard` in the Rakefile, define `YARD::Rake::YardocTask.new`, and
-configure Markdown output under `doc/` in `.yardopts`.
+Add development requirements `yard ~> 0.9` and `yard-markdown ~> 0.9` to the
+gemspec, require `yard` in the Rakefile, define
+`YARD::Rake::YardocTask.new`, and configure Markdown output under `doc/` in
+`.yardopts`.
 
 - [ ] **Step 4: Lock dependencies**
 
@@ -163,8 +167,8 @@ Expected: the generator updates the API index and writes root `llm.txt`.
 
 - [ ] **Step 6: Package `llm.txt`**
 
-Add `llm.txt` to the explicit gemspec file manifest. Keep `doc/` and `bin/`
-excluded.
+Add `llm.txt` and `doc/**/*.{csv,md}` to the explicit gemspec file manifest.
+Keep `bin/` excluded.
 
 - [ ] **Step 7: Run the packaging and full test suites**
 
@@ -194,13 +198,14 @@ and RubyGems builds the current version.
 
 Run: `gem contents --show-install-dir` is not appropriate for an uninstalled
 artifact; use RubyGems package inspection to list the `.gem` payload instead.
-Assert `llm.txt` is present and no `doc/`, `bin/`, or `test/` path is present.
+Assert `llm.txt` and all linked `doc/` files are present and no `bin/` or
+`test/` path is present.
 
 - [ ] **Step 3: Run syntax and cleanliness checks**
 
 Run Ruby syntax checks on both new executables and inspect `git status --short`.
 Expected: syntax is valid and only intentional source, test, lockfile, planning,
-and generated `llm.txt` changes remain; `doc/` and `.gem` artifacts are ignored.
+generated `llm.txt`/`doc/` changes remain; only `.gem` artifacts are ignored.
 
 - [ ] **Step 4: Commit with Lore trailers**
 

@@ -39,9 +39,7 @@ class LlmGenerator
   end
 
   def documentation_files
-    @documentation_files ||= Dir.glob(File.join(root, "doc", "**", "*.md"))
-      .reject { |path| File.expand_path(path) == File.expand_path(main_document) }
-      .sort
+    @documentation_files ||= Dir.glob(File.join(root, "doc", "AgentsHomedir", "**", "*.md")).sort
   end
 
   def documentation_links
