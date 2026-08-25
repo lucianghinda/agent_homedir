@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "rbconfig"
+
+class ReleasePreparer
+  DEFAULT_RUNNER = lambda do |command, working_directory|
+    system(*command, chdir: working_directory)
+  end
+
+  def initialize(
+    root: File.expand_path("..", __dir__),
+    ruby: RbConfig.ruby,
+    runner: DEFAULT_RUNNER,
+    stderr: $stderr
+  )
+    @root = root
+    @ruby = ruby
+    @runner = runner
+    @stderr = stderr
+  end
+
+  def call
+    commands.each do |command|
+      next if runner.call(command, root)
+
+      stderr.puts "Release preparation failed: #{command.join(" ")}"
+      return false
+    end
+
+    true
+  end
+
+  private
+
+  attr_reader :root, :ruby, :runner, :stderr
+
+  def commands
+    [
+      [ruby, "-S", "bundle", "exec", "rake", "test"],
+      [ruby, "-S", "bundle", "exec", "rake", "yard"],
+      [ruby, File.join(root, "bin", "generate_llm.rb")],
+      [ruby, "-S", "gem", "build", "agents_homedir.gemspec"]
+    ]
+  end
+end
+
+exit(ReleasePreparer.new.call ? 0 : 1) if $PROGRAM_NAME == __FILE__
