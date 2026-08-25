@@ -1,0 +1,32 @@
+PATH
+  remote: .
+  specs:
+    agents_homedir (0.1.0)
+      zeitwerk (~> 2.8)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    minitest (5.27.0)
+    rake (13.4.2)
+    zeitwerk (2.8.3)
+
+PLATFORMS
+  arm64-darwin-25
+  ruby
+
+DEPENDENCIES
+  agents_homedir!
+  bundler (>= 2.0, < 5)
+  minitest (~> 5.0)
+  rake (~> 13.0)
+
+CHECKSUMS
+  agents_homedir (0.1.0)
+  bundler (4.0.12) sha256=7f8b757d28dfb636e7b24fba2344ac6dd13b5b24f4b46d62573d483f211825ac
+  minitest (5.27.0) sha256=2d3b17f8a36fe7801c1adcffdbc38233b938eb0b4966e97a6739055a45fa77d5
+  rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
+  zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
+
+BUNDLED WITH
+  4.0.12
