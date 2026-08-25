@@ -2,7 +2,7 @@
 
 Find the home folder an AI coding agent uses, without reading contents.
 
-<img width="1400" height="850" alt="agents_homedir-demo" src="https://github.com/user-attachments/assets/8bccd83b-a81b-4f8e-9414-5eee67a127b4" />
+<img width="1400" height="850" alt="agents_homedir-demo" src="https://github.com/user-attachments/assets/62fa43bc-5df6-42c0-af2c-1f25ea7070a1" />
 
 
 ## Installation
