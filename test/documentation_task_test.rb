@@ -25,8 +25,9 @@ class DocumentationTaskTest < Minitest::Test
       )
 
       assert status.success?, "expected YARD task to pass, stderr: #{stderr.inspect}, stdout: #{stdout.inspect}"
-      assert File.exist?(File.join(doc_directory, "AgentsHomedir.md"))
-      assert File.exist?(File.join(doc_directory, "AgentsHomedir", "Agent.md"))
+      assert File.exist?(File.join(doc_directory, "Agent.md"))
+      assert File.exist?(File.join(doc_directory, "Agent", "Homedir.md"))
+      assert File.exist?(File.join(doc_directory, "Agent", "Homedir", "Entry.md"))
       refute File.exist?(File.join(doc_directory, "stale.md"))
       refute File.exist?(File.join(doc_directory, "docs"))
     end
@@ -40,7 +41,7 @@ class DocumentationTaskTest < Minitest::Test
 
   def with_project_copy
     Dir.mktmpdir do |root|
-      %w[.yardopts Gemfile Gemfile.lock README.md Rakefile agents_homedir.gemspec docs lib].each do |entry|
+      %w[.yardopts Gemfile Gemfile.lock README.md Rakefile agent_homedir.gemspec docs lib].each do |entry|
         FileUtils.cp_r(File.join(project_root, entry), File.join(root, entry))
       end
 

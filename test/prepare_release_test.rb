@@ -42,7 +42,7 @@ class PrepareReleaseTest < Minitest::Test
     builder = ->(_working_directory) { false }
 
     refute ReleasePreparer.new(root: root, ruby: ruby, runner: runner, builder: builder, stderr: stderr).call
-    assert_equal "Release preparation failed: build agents_homedir.gemspec\n", stderr.string
+    assert_equal "Release preparation failed: build agent_homedir.gemspec\n", stderr.string
   end
 
   private

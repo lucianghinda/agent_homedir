@@ -168,7 +168,7 @@ class RegistryTest < Minitest::Test
 
   def test_registry_constant_is_private_but_default_resolver_still_works
     error = assert_raises(NameError) do
-      AgentsHomedir::Registry
+      Agent::Homedir::Registry
     end
 
     assert_includes error.message, "private constant"
@@ -232,11 +232,11 @@ class RegistryTest < Minitest::Test
   private
 
   def registry_entries
-    AgentsHomedir.const_get(:Registry, false).entries
+    Agent::Homedir.const_get(:Registry, false).entries
   end
 
   def build_resolver(env: {}, home:, os:)
-    AgentsHomedir::Resolver.new(env:, home:, os:)
+    Agent::Homedir::Resolver.new(env:, home:, os:)
   end
 
   def target_home(os)

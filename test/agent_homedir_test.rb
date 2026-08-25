@@ -8,46 +8,46 @@ require "rbconfig"
 require "timeout"
 require "tmpdir"
 
-class AgentsHomedirTest < Minitest::Test
+class AgentHomedirTest < Minitest::Test
   def test_that_it_has_a_version_number
-    refute_nil ::AgentsHomedir::VERSION
+    refute_nil ::Agent::Homedir::VERSION
   end
 
   def test_version_string_is_frozen
-    assert_predicate AgentsHomedir::VERSION, :frozen?
+    assert_predicate Agent::Homedir::VERSION, :frozen?
   end
 
   def test_default_resolver_is_memoized
-    resolver = AgentsHomedir.default_resolver
+    resolver = Agent::Homedir.default_resolver
 
-    assert_instance_of AgentsHomedir::Resolver, resolver
-    assert_same resolver, AgentsHomedir.default_resolver
+    assert_instance_of Agent::Homedir::Resolver, resolver
+    assert_same resolver, Agent::Homedir.default_resolver
   end
 
   def test_private_loader_can_eager_load_the_library
-    loader = AgentsHomedir.send(:loader)
+    loader = Agent::Homedir.send(:loader)
 
     assert_kind_of Zeitwerk::Loader, loader
     loader.eager_load
-    assert_equal AgentsHomedir::Agent, AgentsHomedir.const_get(:Agent)
-    assert_equal AgentsHomedir::Resolver, AgentsHomedir.const_get(:Resolver)
-    assert_equal AgentsHomedir::UnknownAgent, AgentsHomedir.const_get(:UnknownAgent)
-    assert_equal AgentsHomedir::HomeNotResolvable, AgentsHomedir.const_get(:HomeNotResolvable)
+    assert_equal Agent::Homedir::Entry, Agent::Homedir.const_get(:Entry)
+    assert_equal Agent::Homedir::Resolver, Agent::Homedir.const_get(:Resolver)
+    assert_equal Agent::Homedir::UnknownAgent, Agent::Homedir.const_get(:UnknownAgent)
+    assert_equal Agent::Homedir::HomeNotResolvable, Agent::Homedir.const_get(:HomeNotResolvable)
   end
 
   def test_default_resolver_monitor_constant_is_private
-    error = assert_raises(NameError) { AgentsHomedir::DEFAULT_RESOLVER_MONITOR }
+    error = assert_raises(NameError) { Agent::Homedir::DEFAULT_RESOLVER_MONITOR }
 
     assert_includes error.message, "private constant"
   end
 
   def test_default_resolver_first_initialization_is_identity_stable_across_parallel_callers
     script = <<~RUBY
-      require "agents_homedir"
+      require "agent_homedir"
       require "thread"
       require "timeout"
 
-      resolver_class = AgentsHomedir::Resolver
+      resolver_class = Agent::Homedir::Resolver
       class << resolver_class
         alias_method :__test_original_new, :new
       end
@@ -76,7 +76,7 @@ class AgentsHomedirTest < Minitest::Test
         Thread.new do
           callers_ready << true
           callers_release.pop
-          results << AgentsHomedir.default_resolver
+          results << Agent::Homedir.default_resolver
         end
       end
 
@@ -112,21 +112,21 @@ class AgentsHomedirTest < Minitest::Test
       configured_home = File.join(initial_home, "configured-home")
       later_home = File.join(initial_home, "later-home")
       script = <<~RUBY
-        require "agents_homedir"
+        require "agent_homedir"
 
         ENV["HOME"] = #{configured_home.inspect}
         ENV["CODEX_HOME"] = "post-require/codex"
 
-        first_resolver = AgentsHomedir.default_resolver
-        first_home = AgentsHomedir.home(:codex).to_s
+        first_resolver = Agent::Homedir.default_resolver
+        first_home = Agent::Homedir.home(:codex).to_s
 
         abort("expected first HOME snapshot") unless first_home == #{File.join(configured_home, "post-require/codex").inspect}
 
         ENV["HOME"] = #{later_home.inspect}
         ENV["CODEX_HOME"] = "changed-after-first-access/codex"
 
-        second_resolver = AgentsHomedir.default_resolver
-        second_home = AgentsHomedir.home(:codex).to_s
+        second_resolver = Agent::Homedir.default_resolver
+        second_home = Agent::Homedir.home(:codex).to_s
 
         abort("expected memoized resolver identity") unless first_resolver.equal?(second_resolver)
         abort("expected same path after ENV mutation") unless second_home == first_home
@@ -143,7 +143,7 @@ class AgentsHomedirTest < Minitest::Test
   end
 
   def test_home_installed_and_fetch_delegate_to_default_resolver
-    agent = AgentsHomedir::Agent.new(
+    agent = Agent::Homedir::Entry.new(
       name: :codex,
       label: "Codex",
       env_override: "CODEX_HOME",
@@ -157,9 +157,9 @@ class AgentsHomedirTest < Minitest::Test
     )
 
     with_default_resolver(resolver) do
-      assert_equal Pathname("/tmp/codex-home"), AgentsHomedir.home("codex")
-      assert_equal true, AgentsHomedir.installed?(:codex)
-      assert_same agent, AgentsHomedir["codex"]
+      assert_equal Pathname("/tmp/codex-home"), Agent::Homedir.home("codex")
+      assert_equal true, Agent::Homedir.installed?(:codex)
+      assert_same agent, Agent::Homedir["codex"]
     end
 
     assert_equal [:codex], resolver.home_calls
@@ -173,7 +173,7 @@ class AgentsHomedirTest < Minitest::Test
       gamma_dir = File.join(dir, ".gamma")
       FileUtils.mkdir_p(gamma_dir)
 
-      resolver = AgentsHomedir::Resolver.new(
+      resolver = Agent::Homedir::Resolver.new(
         env: {},
         home: dir,
         os: :linux,
@@ -185,22 +185,22 @@ class AgentsHomedirTest < Minitest::Test
       )
 
       with_default_resolver(resolver) do
-        assert_equal %i[beta alpha gamma], AgentsHomedir.names
-        assert_predicate AgentsHomedir.names, :frozen?
-        assert_same resolver.names, AgentsHomedir.names
+        assert_equal %i[beta alpha gamma], Agent::Homedir.names
+        assert_predicate Agent::Homedir.names, :frozen?
+        assert_same resolver.names, Agent::Homedir.names
 
-        assert_equal %i[beta alpha gamma], AgentsHomedir.agents.map(&:name)
-        assert_predicate AgentsHomedir.agents, :frozen?
-        assert_same resolver.agents, AgentsHomedir.agents
+        assert_equal %i[beta alpha gamma], Agent::Homedir.agents.map(&:name)
+        assert_predicate Agent::Homedir.agents, :frozen?
+        assert_same resolver.agents, Agent::Homedir.agents
 
-        first_installed = AgentsHomedir.installed
+        first_installed = Agent::Homedir.installed
         assert_equal %i[gamma], first_installed.map(&:name)
         assert_predicate first_installed, :frozen?
         assert_same resolver.agents[2], first_installed.first
 
         FileUtils.mkdir_p(alpha_dir)
 
-        second_installed = AgentsHomedir.installed
+        second_installed = Agent::Homedir.installed
         assert_equal %i[alpha gamma], second_installed.map(&:name)
         assert_predicate second_installed, :frozen?
         assert_same resolver.agents[1], second_installed[0]
@@ -211,7 +211,7 @@ class AgentsHomedirTest < Minitest::Test
   end
 
   def test_fetch_raises_unknown_agent_with_valid_names
-    resolver = AgentsHomedir::Resolver.new(
+    resolver = Agent::Homedir::Resolver.new(
       env: {},
       home: "/tmp/home",
       os: :linux,
@@ -222,7 +222,7 @@ class AgentsHomedirTest < Minitest::Test
     )
 
     error = with_default_resolver(resolver) do
-      assert_raises(AgentsHomedir::UnknownAgent) { AgentsHomedir[:gamma] }
+      assert_raises(Agent::Homedir::UnknownAgent) { Agent::Homedir[:gamma] }
     end
 
     assert_includes error.message, "gamma"
@@ -234,13 +234,13 @@ class AgentsHomedirTest < Minitest::Test
     readme = File.read(File.expand_path("../README.md", __dir__))
 
     assert_includes readme, "snapshotted on first access"
-    assert_includes readme, "instantiate `AgentsHomedir::Resolver`"
+    assert_includes readme, "instantiate `Agent::Homedir::Resolver`"
   end
 
   def test_readme_lists_every_supported_agent
     readme = File.read(File.expand_path("../README.md", __dir__))
 
-    AgentsHomedir.agents.each do |agent|
+    Agent::Homedir.agents.each do |agent|
       assert_includes readme, "| #{agent.label} | `:#{agent.name}` |"
     end
   end
@@ -265,16 +265,16 @@ class AgentsHomedirTest < Minitest::Test
   end
 
   def with_default_resolver(resolver)
-    had_original = AgentsHomedir.instance_variable_defined?(:@default_resolver)
-    original_resolver = AgentsHomedir.instance_variable_get(:@default_resolver)
+    had_original = Agent::Homedir.instance_variable_defined?(:@default_resolver)
+    original_resolver = Agent::Homedir.instance_variable_get(:@default_resolver)
 
-    AgentsHomedir.instance_variable_set(:@default_resolver, resolver)
+    Agent::Homedir.instance_variable_set(:@default_resolver, resolver)
     yield
   ensure
     if had_original
-      AgentsHomedir.instance_variable_set(:@default_resolver, original_resolver)
+      Agent::Homedir.instance_variable_set(:@default_resolver, original_resolver)
     else
-      AgentsHomedir.remove_instance_variable(:@default_resolver)
+      Agent::Homedir.remove_instance_variable(:@default_resolver)
     end
   end
 

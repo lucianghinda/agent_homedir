@@ -1,8 +1,8 @@
-# AgentsHomedir
+# Agent::Homedir
 
 Find the home folder an AI coding agent uses, without reading contents.
 
-<img width="1400" height="850" alt="agents_homedir-demo" src="https://github.com/user-attachments/assets/62fa43bc-5df6-42c0-af2c-1f25ea7070a1" />
+<img width="1400" height="850" alt="agent_homedir-demo" src="https://github.com/user-attachments/assets/62fa43bc-5df6-42c0-af2c-1f25ea7070a1" />
 
 
 ## Installation
@@ -12,7 +12,7 @@ Use Ruby 3.2 or newer. The gem ships with one runtime dependency: Zeitwerk 2.8.
 Add this line to your application's **Gemfile**:
 
 ```ruby
-gem "agents_homedir"
+gem "agent_homedir"
 ```
 
 Then run:
@@ -24,7 +24,7 @@ bundle install
 Or install it directly:
 
 ```sh
-gem install agents_homedir
+gem install agent_homedir
 ```
 
 ## Quick Start
@@ -32,33 +32,33 @@ gem install agents_homedir
 Get a home path:
 
 ```ruby
-require "agents_homedir"
+require "agent_homedir"
 
-AgentsHomedir.home(:claude_code)
+Agent::Homedir.home(:claude_code)
 ```
 
 Check installation:
 
 ```ruby
-require "agents_homedir"
+require "agent_homedir"
 
-AgentsHomedir.installed?(:codex)
+Agent::Homedir.installed?(:codex)
 ```
 
 Expect a `Pathname` and a boolean.
 
 The module facade is snapshotted on first access.
 That snapshots `ENV` and `HOME` for the rest of the process.
-If you need a different snapshot, instantiate `AgentsHomedir::Resolver` directly.
+If you need a different snapshot, instantiate `Agent::Homedir::Resolver` directly.
 
 ## Usage
 
 Fetch an agent:
 
 ```ruby
-require "agents_homedir"
+require "agent_homedir"
 
-agent = AgentsHomedir[:codex]
+agent = Agent::Homedir[:codex]
 
 agent.name
 agent.label
@@ -68,11 +68,11 @@ agent.home
 Discover the catalog:
 
 ```ruby
-require "agents_homedir"
+require "agent_homedir"
 
-AgentsHomedir.names
-AgentsHomedir.agents
-AgentsHomedir.installed
+Agent::Homedir.names
+Agent::Homedir.agents
+Agent::Homedir.installed
 ```
 
 Expect ordered, frozen arrays.
@@ -112,9 +112,9 @@ Use these names with every lookup method:
 Inspect agent facts:
 
 ```ruby
-require "agents_homedir"
+require "agent_homedir"
 
-agent = AgentsHomedir[:claude_code]
+agent = Agent::Homedir[:claude_code]
 
 agent.env_override
 agent.verified_on
@@ -139,8 +139,8 @@ Agent facts:
 
 Errors:
 
-- Catch `AgentsHomedir::UnknownAgent` to list valid names.
-- Catch `AgentsHomedir::HomeNotResolvable` for missing, blank, or nonabsolute `HOME`.
+- Catch `Agent::Homedir::UnknownAgent` to list valid names.
+- Catch `Agent::Homedir::HomeNotResolvable` for missing, blank, or nonabsolute `HOME`.
 
 ## Testing
 
@@ -149,9 +149,9 @@ Instantiate a fresh resolver when you need a different environment snapshot.
 Do not stub global `ENV`.
 
 ```ruby
-require "agents_homedir"
+require "agent_homedir"
 
-resolver = AgentsHomedir::Resolver.new(
+resolver = Agent::Homedir::Resolver.new(
   env: { "CODEX_HOME" => "custom/codex" },
   home: "/Users/me",
   os: :linux

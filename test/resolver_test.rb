@@ -19,7 +19,7 @@ class ResolverTest < Minitest::Test
 
     agent = resolver[:codex]
 
-    assert_instance_of AgentsHomedir::Agent, agent
+    assert_instance_of Agent::Homedir::Entry, agent
     assert_equal :codex, agent.name
     assert_equal "Codex", agent.label
     assert_equal "CODEX_HOME", agent.env_override
@@ -159,7 +159,7 @@ class ResolverTest < Minitest::Test
   end
 
   def test_default_entries_come_from_registry_when_not_injected
-    resolver = AgentsHomedir::Resolver.new(env: {}, home: "/home/test", os: :linux)
+    resolver = Agent::Homedir::Resolver.new(env: {}, home: "/home/test", os: :linux)
 
     assert_equal Pathname("/home/test/.codex"), resolver.home(:codex)
     assert_equal "Codex CLI", resolver[:codex].label
@@ -186,9 +186,9 @@ class ResolverTest < Minitest::Test
 
   def test_resolver_file_is_independently_requireable
     script = <<~RUBY
-      require "agents_homedir/resolver"
+      require "agent/homedir/resolver"
 
-      resolver = AgentsHomedir::Resolver.new(
+      resolver = Agent::Homedir::Resolver.new(
         env: {},
         home: "/home/test",
         os: :linux,
@@ -203,7 +203,7 @@ class ResolverTest < Minitest::Test
       )
 
       agent = resolver[:x]
-      abort("wrong class") unless agent.class == AgentsHomedir::Agent
+      abort("wrong class") unless agent.class == Agent::Homedir::Entry
       abort("wrong label") unless agent.label == "Agent X"
       abort("wrong date") unless agent.verified_on == Date.new(2026, 8, 20)
     RUBY
@@ -237,7 +237,7 @@ class ResolverTest < Minitest::Test
   end
 
   def test_home_prefers_absolute_env_override_even_when_missing
-    resolver = AgentsHomedir::Resolver.new(
+    resolver = Agent::Homedir::Resolver.new(
       env: {"CODEX_HOME" => "/tmp/missing-codex-home"},
       home: "/home/test",
       os: :linux,
@@ -629,7 +629,7 @@ class ResolverTest < Minitest::Test
       }
     )
 
-    error = assert_raises(AgentsHomedir::UnknownAgent) do
+    error = assert_raises(Agent::Homedir::UnknownAgent) do
       resolver.home(:cursor)
     end
 
@@ -646,9 +646,9 @@ class ResolverTest < Minitest::Test
         entries: {codex: entry(env: "CODEX_HOME", paths: ["~/.codex"])}
       )
 
-      assert_raises(AgentsHomedir::HomeNotResolvable) { resolver.home(:codex) }
-      assert_raises(AgentsHomedir::HomeNotResolvable) { resolver.candidates(:codex) }
-      assert_raises(AgentsHomedir::HomeNotResolvable) { resolver.installed?(:codex) }
+      assert_raises(Agent::Homedir::HomeNotResolvable) { resolver.home(:codex) }
+      assert_raises(Agent::Homedir::HomeNotResolvable) { resolver.candidates(:codex) }
+      assert_raises(Agent::Homedir::HomeNotResolvable) { resolver.installed?(:codex) }
     end
   end
 
@@ -661,13 +661,13 @@ class ResolverTest < Minitest::Test
   end
 
   def test_detect_os_supports_windows_without_accepting_cygwin
-    assert_equal :macos, AgentsHomedir::Resolver.send(:detect_os, "darwin23.5.0")
-    assert_equal :linux, AgentsHomedir::Resolver.send(:detect_os, "linux-gnu")
-    assert_equal :windows, AgentsHomedir::Resolver.send(:detect_os, "mswin")
-    assert_equal :windows, AgentsHomedir::Resolver.send(:detect_os, "mingw")
+    assert_equal :macos, Agent::Homedir::Resolver.send(:detect_os, "darwin23.5.0")
+    assert_equal :linux, Agent::Homedir::Resolver.send(:detect_os, "linux-gnu")
+    assert_equal :windows, Agent::Homedir::Resolver.send(:detect_os, "mswin")
+    assert_equal :windows, Agent::Homedir::Resolver.send(:detect_os, "mingw")
 
     error = assert_raises(ArgumentError) do
-      AgentsHomedir::Resolver.send(:detect_os, "x86_64-pc-cygwin")
+      Agent::Homedir::Resolver.send(:detect_os, "x86_64-pc-cygwin")
     end
 
     assert_includes error.message, "cygwin"
@@ -698,7 +698,7 @@ class ResolverTest < Minitest::Test
   end
 
   def test_windows_opencode_candidates_use_localappdata_when_appdata_and_xdg_data_home_are_missing
-    resolver = AgentsHomedir::Resolver.new(
+    resolver = Agent::Homedir::Resolver.new(
       env: {
         "LOCALAPPDATA" => "D:/Profiles/Test/Local"
       },
@@ -714,7 +714,7 @@ class ResolverTest < Minitest::Test
   end
 
   def test_windows_opencode_candidates_use_optional_xdg_data_home_before_profile_defaults
-    resolver = AgentsHomedir::Resolver.new(
+    resolver = Agent::Homedir::Resolver.new(
       env: {
         "XDG_DATA_HOME" => "D:/Portable/Data"
       },
@@ -732,7 +732,7 @@ class ResolverTest < Minitest::Test
 
   def test_windows_opencode_candidates_skip_optional_xdg_data_home_when_not_absolute
     ["portable/data", "~/.portable/data"].each do |invalid_value|
-      resolver = AgentsHomedir::Resolver.new(
+      resolver = Agent::Homedir::Resolver.new(
         env: {
           "XDG_DATA_HOME" => invalid_value,
           "APPDATA" => "C:/Users/Test/AppData/Roaming",
@@ -751,7 +751,7 @@ class ResolverTest < Minitest::Test
   end
 
   def test_windows_opencode_candidates_derive_profile_defaults_when_known_env_bases_are_missing
-    resolver = AgentsHomedir::Resolver.new(
+    resolver = Agent::Homedir::Resolver.new(
       env: {},
       home: "C:/Users/Test",
       os: :windows
@@ -765,7 +765,7 @@ class ResolverTest < Minitest::Test
   end
 
   def test_windows_cursor_candidate_derives_appdata_from_home_when_env_is_missing
-    resolver = AgentsHomedir::Resolver.new(
+    resolver = Agent::Homedir::Resolver.new(
       env: {},
       home: "C:/Users/Test",
       os: :windows
@@ -799,7 +799,7 @@ class ResolverTest < Minitest::Test
   private
 
   def build_resolver(env: {}, home: "/home/test", os: :linux, entries: {})
-    AgentsHomedir::Resolver.new(env:, home:, os:, entries:)
+    Agent::Homedir::Resolver.new(env:, home:, os:, entries:)
   end
 
   def entry(env: nil, paths:, label: "Agent", verified_on: %i[linux macos windows])
@@ -818,7 +818,7 @@ class ResolverTest < Minitest::Test
     errors
   end
 
-  class ConcurrentAgentsResolver < AgentsHomedir::Resolver
+  class ConcurrentAgentsResolver < Agent::Homedir::Resolver
     attr_reader :fetch_started, :fetch_release
 
     def initialize(fetch_started:, fetch_release:, **kwargs)

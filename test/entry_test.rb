@@ -6,7 +6,7 @@ require "fileutils"
 require "pathname"
 require "tmpdir"
 
-class AgentTest < Minitest::Test
+class EntryTest < Minitest::Test
   def test_with_without_changes_returns_self
     agent = build_resolver(entries: {codex: entry(paths: ["~/.codex"])} )[:codex]
 
@@ -111,8 +111,8 @@ class AgentTest < Minitest::Test
 
     agent = resolver[:codex]
 
-    assert_equal %i[name label env_override verified_on], AgentsHomedir::Agent.members
-    assert_instance_of AgentsHomedir::Agent, agent
+    assert_equal %i[name label env_override verified_on], Agent::Homedir::Entry.members
+    assert_instance_of Agent::Homedir::Entry, agent
     assert_equal :codex, agent.name
     assert_equal "Codex", agent.label
     assert_equal "CODEX_HOME", agent.env_override
@@ -179,7 +179,7 @@ class AgentTest < Minitest::Test
     agent = build_resolver(entries: {codex: entry(paths: ["~/.codex"])} )[:codex]
 
     refute_respond_to agent, :resolver
-    refute_includes AgentsHomedir::Agent.members, :resolver
+    refute_includes Agent::Homedir::Entry.members, :resolver
   end
 
   def test_invalid_verified_on_fails_clearly
@@ -197,7 +197,7 @@ class AgentTest < Minitest::Test
 
   def test_direct_construction_validates_documented_fact_types
     error = assert_raises(ArgumentError) do
-      AgentsHomedir::Agent.new(
+      Agent::Homedir::Entry.new(
         name: "codex",
         label: "Codex",
         env_override: "CODEX_HOME",
@@ -209,7 +209,7 @@ class AgentTest < Minitest::Test
     assert_includes error.message, "Symbol"
 
     error = assert_raises(ArgumentError) do
-      AgentsHomedir::Agent.new(
+      Agent::Homedir::Entry.new(
         name: :codex,
         label: :codex,
         env_override: "CODEX_HOME",
@@ -221,7 +221,7 @@ class AgentTest < Minitest::Test
     assert_includes error.message, "String"
 
     error = assert_raises(ArgumentError) do
-      AgentsHomedir::Agent.new(
+      Agent::Homedir::Entry.new(
         name: :codex,
         label: "Codex",
         env_override: :codex_home,
@@ -233,7 +233,7 @@ class AgentTest < Minitest::Test
     assert_includes error.message, "String or nil"
 
     error = assert_raises(ArgumentError) do
-      AgentsHomedir::Agent.new(
+      Agent::Homedir::Entry.new(
         name: :codex,
         label: "Codex",
         env_override: "CODEX_HOME",
@@ -266,7 +266,7 @@ class AgentTest < Minitest::Test
   private
 
   def build_resolver(env: {}, home: "/home/test", os: :linux, entries: {})
-    AgentsHomedir::Resolver.new(env:, home:, os:, entries:)
+    Agent::Homedir::Resolver.new(env:, home:, os:, entries:)
   end
 
   def entry(label: "Agent", env: nil, paths:, verified_on: nil)

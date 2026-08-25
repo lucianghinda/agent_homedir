@@ -1,9 +1,9 @@
-# Class AgentsHomedir::Resolver <a id="class-AgentsHomedir-Resolver"></a>
+# Class Agent::Homedir::Resolver <a id="class-Agent-Homedir-Resolver"></a>
 
 |  |  |
 | --- | --- |
 | **Inherits** | Object |
-| **Defined in** | lib/agents_homedir/resolver.rb |
+| **Defined in** | lib/agent/homedir/resolver.rb |
 
 ## Constants
 ### `VALID_OSES` <a id="constant-VALID_OSES"></a> <a id="VALID_OSES-constant"></a>

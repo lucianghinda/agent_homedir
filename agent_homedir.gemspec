@@ -1,19 +1,17 @@
 
 # frozen_string_literal: true
 
-lib = File.expand_path("../lib", __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "agents_homedir/version"
+require_relative "lib/agent/homedir/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "agents_homedir"
-  spec.version       = AgentsHomedir::VERSION
+  spec.name          = "agent_homedir"
+  spec.version       = Agent::Homedir::VERSION
   spec.authors       = ["Lucian Ghinda"]
   spec.email         = ["lucian@ghinda.com"]
 
   spec.summary       = "Resolve home directories for AI coding agents."
   spec.description   = "Helpers for resolving and normalizing home directories used by AI coding agents."
-  spec.homepage      = "https://github.com/lucianghinda/agents_homedir"
+  spec.homepage      = "https://github.com/lucianghinda/agent_homedir"
   spec.license       = "MIT"
   spec.required_ruby_version = ">= 3.2"
 

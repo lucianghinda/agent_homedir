@@ -14,38 +14,40 @@ class PackagingTest < Minitest::Test
     CHANGELOG.md
     LICENSE.txt
     README.md
-    doc/AgentsHomedir.md
-    doc/AgentsHomedir/Agent.md
-    doc/AgentsHomedir/Error.md
-    doc/AgentsHomedir/HomeNotResolvable.md
-    doc/AgentsHomedir/Resolver.md
-    doc/AgentsHomedir/UnknownAgent.md
+    doc/Agent.md
+    doc/Agent/Homedir.md
+    doc/Agent/Homedir/Entry.md
+    doc/Agent/Homedir/Error.md
+    doc/Agent/Homedir/HomeNotResolvable.md
+    doc/Agent/Homedir/Resolver.md
+    doc/Agent/Homedir/UnknownAgent.md
     doc/CHANGELOG.md
     doc/README.md
     doc/index.csv
-    lib/agents_homedir.rb
-    lib/agents_homedir/agent.rb
-    lib/agents_homedir/error.rb
-    lib/agents_homedir/home_not_resolvable.rb
-    lib/agents_homedir/registry.rb
-    lib/agents_homedir/resolver.rb
-    lib/agents_homedir/unknown_agent.rb
-    lib/agents_homedir/version.rb
+    lib/agent/homedir.rb
+    lib/agent/homedir/entry.rb
+    lib/agent/homedir/error.rb
+    lib/agent/homedir/home_not_resolvable.rb
+    lib/agent/homedir/registry.rb
+    lib/agent/homedir/resolver.rb
+    lib/agent/homedir/unknown_agent.rb
+    lib/agent/homedir/version.rb
+    lib/agent_homedir.rb
     llm.txt
   ].freeze
 
   def test_gemspec_exposes_modern_packaging_metadata
-    spec = Gem::Specification.load(File.expand_path("../agents_homedir.gemspec", __dir__))
+    spec = Gem::Specification.load(File.expand_path("../agent_homedir.gemspec", __dir__))
 
-    assert_equal "agents_homedir", spec.name
-    assert_equal "0.2.0", spec.version.to_s
+    assert_equal "agent_homedir", spec.name
+    assert_equal "0.3.0", spec.version.to_s
     assert_equal "Resolve home directories for AI coding agents.", spec.summary
     assert_equal "MIT", spec.license
-    assert_equal "https://github.com/lucianghinda/agents_homedir", spec.homepage
+    assert_equal "https://github.com/lucianghinda/agent_homedir", spec.homepage
     assert_equal ">= 3.2", spec.required_ruby_version.to_s
-    assert_equal "https://github.com/lucianghinda/agents_homedir", spec.metadata["source_code_uri"]
-    assert_equal "https://github.com/lucianghinda/agents_homedir/issues", spec.metadata["bug_tracker_uri"]
-    assert_equal "https://github.com/lucianghinda/agents_homedir/blob/main/CHANGELOG.md", spec.metadata["changelog_uri"]
+    assert_equal "https://github.com/lucianghinda/agent_homedir", spec.metadata["source_code_uri"]
+    assert_equal "https://github.com/lucianghinda/agent_homedir/issues", spec.metadata["bug_tracker_uri"]
+    assert_equal "https://github.com/lucianghinda/agent_homedir/blob/main/CHANGELOG.md", spec.metadata["changelog_uri"]
     assert_equal "true", spec.metadata["rubygems_mfa_required"]
     refute spec.metadata.key?("allowed_push_host")
 
@@ -70,13 +72,13 @@ class PackagingTest < Minitest::Test
     changelog_path = File.expand_path("../CHANGELOG.md", __dir__)
 
     assert File.exist?(changelog_path), "expected CHANGELOG.md to exist"
-    assert_includes File.read(changelog_path), "## [0.2.0] - 2026-08-25"
+    assert_includes File.read(changelog_path), "## [0.3.0] - 2026-08-25"
   end
 
   def test_gemspec_manifest_is_explicit_and_buildable_without_git_repository
     with_non_git_copy do |copy_dir|
       Dir.chdir(copy_dir) do
-        spec = Gem::Specification.load("agents_homedir.gemspec")
+        spec = Gem::Specification.load("agent_homedir.gemspec")
 
         assert_equal EXPECTED_PACKAGED_FILES, spec.files.sort
         refute_includes spec.files, "CODE_OF_CONDUCT.md"
@@ -96,7 +98,7 @@ class PackagingTest < Minitest::Test
   def test_built_gem_installs_and_requires_as_an_isolated_artifact
     with_non_git_copy do |copy_dir|
       built_gem = Dir.chdir(copy_dir) do
-        spec = Gem::Specification.load("agents_homedir.gemspec")
+        spec = Gem::Specification.load("agent_homedir.gemspec")
         Gem::Package.build(spec)
       end
 
@@ -124,13 +126,13 @@ class PackagingTest < Minitest::Test
       assert status.success?, "expected gem install to succeed, stderr: #{stderr.inspect}, stdout: #{stdout.inspect}"
 
       script = <<~RUBY
-        gem "agents_homedir"
-        require "agents_homedir"
+        gem "agent_homedir"
+        require "agent_homedir"
 
-        abort("expected frozen version") unless AgentsHomedir::VERSION.frozen?
-        AgentsHomedir.send(:loader).eager_load
-        abort("expected resolver constant") unless defined?(AgentsHomedir::Resolver)
-        abort("expected codex home") unless AgentsHomedir::Resolver.new(
+        abort("expected frozen version") unless Agent::Homedir::VERSION.frozen?
+        Agent::Homedir.send(:loader).eager_load
+        abort("expected resolver constant") unless defined?(Agent::Homedir::Resolver)
+        abort("expected codex home") unless Agent::Homedir::Resolver.new(
           env: {"CODEX_HOME" => "/tmp/codex"},
           home: "/tmp/home",
           os: :linux
@@ -151,7 +153,7 @@ class PackagingTest < Minitest::Test
   end
 
   def test_llm_document_links_only_to_packaged_files
-    spec = Gem::Specification.load(File.expand_path("../agents_homedir.gemspec", __dir__))
+    spec = Gem::Specification.load(File.expand_path("../agent_homedir.gemspec", __dir__))
     llm_document = File.read(File.expand_path("../llm.txt", __dir__))
     linked_files = llm_document.scan(%r{\]\((doc/[^)]+)\)}).flatten
 

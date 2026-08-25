@@ -9,7 +9,7 @@ class ReleasePreparer
     system(*command, chdir: working_directory)
   end
   DEFAULT_BUILDER = lambda do |working_directory|
-    specification = Gem::Specification.load(File.join(working_directory, "agents_homedir.gemspec"))
+    specification = Gem::Specification.load(File.join(working_directory, "agent_homedir.gemspec"))
     Dir.chdir(working_directory) { Gem::Package.build(specification) }
   end
 
@@ -37,7 +37,7 @@ class ReleasePreparer
 
     return true if builder.call(root)
 
-    stderr.puts "Release preparation failed: build agents_homedir.gemspec"
+    stderr.puts "Release preparation failed: build agent_homedir.gemspec"
     false
   end
 

@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 class LlmGenerator
-  MAIN_DOCUMENT = File.join("doc", "AgentsHomedir.md")
+  MAIN_DOCUMENT = File.join("doc", "Agent", "Homedir.md")
 
   def initialize(root: File.expand_path("..", __dir__), stdout: $stdout, stderr: $stderr)
     @root = root
@@ -39,20 +39,20 @@ class LlmGenerator
   end
 
   def documentation_files
-    @documentation_files ||= Dir.glob(File.join(root, "doc", "AgentsHomedir", "**", "*.md")).sort
+    @documentation_files ||= Dir.glob(File.join(root, "doc", "Agent", "Homedir", "**", "*.md")).sort
   end
 
   def documentation_links
     documentation_files.map do |path|
-      relative_path = path.delete_prefix("#{File.join(root, "doc")}/")
+      relative_path = path.delete_prefix("#{File.dirname(main_document)}/")
       "- [#{relative_path}](#{relative_path})"
     end.join("\n")
   end
 
   def root_relative_links(content)
     content
-      .gsub("[AgentsHomedir/", "[doc/AgentsHomedir/")
-      .gsub("(AgentsHomedir/", "(doc/AgentsHomedir/")
+      .gsub("[Homedir/", "[doc/Agent/Homedir/")
+      .gsub("(Homedir/", "(doc/Agent/Homedir/")
   end
 end
 

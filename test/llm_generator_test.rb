@@ -14,20 +14,20 @@ class LlmGeneratorTest < Minitest::Test
       assert LlmGenerator.new(root: root, stdout: stdout).call
 
       expected_main = <<~MARKDOWN
-        # Module: AgentsHomedir
+        # Module: Agent::Homedir
 
         API documentation.
 
         # Documentation
 
-        - [AgentsHomedir/Agent.md](AgentsHomedir/Agent.md)
-        - [AgentsHomedir/Nested/Resolver.md](AgentsHomedir/Nested/Resolver.md)
-        - [AgentsHomedir/Registry.md](AgentsHomedir/Registry.md)
+        - [Homedir/Entry.md](Homedir/Entry.md)
+        - [Homedir/Nested/Resolver.md](Homedir/Nested/Resolver.md)
+        - [Homedir/Registry.md](Homedir/Registry.md)
       MARKDOWN
 
       expected_llm = expected_main
-        .gsub("[AgentsHomedir/", "[doc/AgentsHomedir/")
-        .gsub("(AgentsHomedir/", "(doc/AgentsHomedir/")
+        .gsub("[Homedir/", "[doc/Agent/Homedir/")
+        .gsub("(Homedir/", "(doc/Agent/Homedir/")
 
       assert_equal expected_main, File.read(main_document)
       assert_equal expected_llm, File.read(File.join(root, "llm.txt"))
@@ -54,7 +54,7 @@ class LlmGeneratorTest < Minitest::Test
       stderr = StringIO.new
 
       refute LlmGenerator.new(root: root, stdout: StringIO.new, stderr: stderr).call
-      assert_match %r{Missing .*/doc/AgentsHomedir\.md}, stderr.string
+      assert_match %r{Missing .*/doc/Agent/Homedir\.md}, stderr.string
       refute File.exist?(File.join(root, "llm.txt"))
     end
   end
@@ -63,11 +63,11 @@ class LlmGeneratorTest < Minitest::Test
 
   def with_documentation_tree
     Dir.mktmpdir do |root|
-      main_document = File.join(root, "doc", "AgentsHomedir.md")
-      FileUtils.mkdir_p(File.join(root, "doc", "AgentsHomedir", "Nested"))
+      main_document = File.join(root, "doc", "Agent", "Homedir.md")
+      FileUtils.mkdir_p(File.join(root, "doc", "Agent", "Homedir", "Nested"))
       FileUtils.mkdir_p(File.join(root, "doc", "docs", "superpowers"))
       File.write(main_document, <<~MARKDOWN)
-        # Module: AgentsHomedir
+        # Module: Agent::Homedir
 
         API documentation.
 
@@ -75,9 +75,9 @@ class LlmGeneratorTest < Minitest::Test
 
         - [stale](stale.md)
       MARKDOWN
-      File.write(File.join(root, "doc", "AgentsHomedir", "Registry.md"), "Registry")
-      File.write(File.join(root, "doc", "AgentsHomedir", "Agent.md"), "Agent")
-      File.write(File.join(root, "doc", "AgentsHomedir", "Nested", "Resolver.md"), "Resolver")
+      File.write(File.join(root, "doc", "Agent", "Homedir", "Registry.md"), "Registry")
+      File.write(File.join(root, "doc", "Agent", "Homedir", "Entry.md"), "Entry")
+      File.write(File.join(root, "doc", "Agent", "Homedir", "Nested", "Resolver.md"), "Resolver")
       File.write(File.join(root, "doc", "README.md"), "Project README")
       File.write(File.join(root, "doc", "docs", "superpowers", "plan.md"), "Release plan")
 

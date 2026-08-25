@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.0] - 2026-08-25
+
+### Changed
+
+- Renamed the gem from `agents_homedir` to `agent_homedir`.
+- Moved the public API from `AgentsHomedir` to `Agent::Homedir` for the planned
+  `Agent::` gem family.
+- Renamed the immutable data class from `AgentsHomedir::Agent` to
+  `Agent::Homedir::Entry`.
+
+### Deprecated
+
+- Deprecated the old `agents_homedir` gem in favor of `agent_homedir`.
+
 ## [0.2.0] - 2026-08-25
 
 ### Added

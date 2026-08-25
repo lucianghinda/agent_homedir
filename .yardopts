@@ -2,7 +2,7 @@
 --format markdown
 --output-dir doc
 --no-cache
---title AgentsHomedir
+--title "Agent::Homedir"
 --protected
 --no-private
 --plugin markdown
