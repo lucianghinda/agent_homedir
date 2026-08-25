@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.name          = "agents_homedir"
   spec.version       = AgentsHomedir::VERSION
   spec.authors       = ["Lucian Ghinda"]
-  spec.email         = ["lucianghinda@users.noreply.github.com"]
+  spec.email         = ["lucian@ghinda.com"]
 
   spec.summary       = "Resolve home directories for AI coding agents."
   spec.description   = "Helpers for resolving and normalizing home directories used by AI coding agents."
