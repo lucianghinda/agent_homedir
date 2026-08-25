@@ -20,11 +20,12 @@ Gem::Specification.new do |spec|
   spec.metadata = {
     "source_code_uri" => spec.homepage,
     "bug_tracker_uri" => "#{spec.homepage}/issues",
+    "changelog_uri" => "#{spec.homepage}/blob/main/CHANGELOG.md",
     "rubygems_mfa_required" => "true"
   }
 
   spec.files         = Dir.chdir(File.expand_path("..", __FILE__)) do
-    (%w[LICENSE.txt README.md llm.txt] + Dir.glob("doc/**/*.{csv,md}") + Dir.glob("lib/**/*.rb")).sort
+    (%w[CHANGELOG.md LICENSE.txt README.md llm.txt] + Dir.glob("doc/**/*.{csv,md}") + Dir.glob("lib/**/*.rb")).sort
   end
   spec.require_paths = ["lib"]
   spec.add_dependency "zeitwerk", "~> 2.8"

@@ -11,6 +11,7 @@ require "tmpdir"
 
 class PackagingTest < Minitest::Test
   EXPECTED_PACKAGED_FILES = %w[
+    CHANGELOG.md
     LICENSE.txt
     README.md
     doc/AgentsHomedir.md
@@ -19,6 +20,7 @@ class PackagingTest < Minitest::Test
     doc/AgentsHomedir/HomeNotResolvable.md
     doc/AgentsHomedir/Resolver.md
     doc/AgentsHomedir/UnknownAgent.md
+    doc/CHANGELOG.md
     doc/README.md
     doc/index.csv
     lib/agents_homedir.rb
@@ -36,12 +38,14 @@ class PackagingTest < Minitest::Test
     spec = Gem::Specification.load(File.expand_path("../agents_homedir.gemspec", __dir__))
 
     assert_equal "agents_homedir", spec.name
+    assert_equal "0.2.0", spec.version.to_s
     assert_equal "Resolve home directories for AI coding agents.", spec.summary
     assert_equal "MIT", spec.license
     assert_equal "https://github.com/lucianghinda/agents_homedir", spec.homepage
     assert_equal ">= 3.2", spec.required_ruby_version.to_s
     assert_equal "https://github.com/lucianghinda/agents_homedir", spec.metadata["source_code_uri"]
     assert_equal "https://github.com/lucianghinda/agents_homedir/issues", spec.metadata["bug_tracker_uri"]
+    assert_equal "https://github.com/lucianghinda/agents_homedir/blob/main/CHANGELOG.md", spec.metadata["changelog_uri"]
     assert_equal "true", spec.metadata["rubygems_mfa_required"]
     refute spec.metadata.key?("allowed_push_host")
 
@@ -60,6 +64,13 @@ class PackagingTest < Minitest::Test
       },
       development_dependencies
     )
+  end
+
+  def test_current_release_is_documented_in_the_changelog
+    changelog_path = File.expand_path("../CHANGELOG.md", __dir__)
+
+    assert File.exist?(changelog_path), "expected CHANGELOG.md to exist"
+    assert_includes File.read(changelog_path), "## [0.2.0] - 2026-08-25"
   end
 
   def test_gemspec_manifest_is_explicit_and_buildable_without_git_repository

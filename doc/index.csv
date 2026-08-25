@@ -1,5 +1,6 @@
 name,type,path
 README.md,File,README.md
+CHANGELOG.md,File,CHANGELOG.md
 AgentsHomedir,Module,AgentsHomedir.md
 AgentsHomedir.DEFAULT_RESOLVER_MONITOR,Constant,AgentsHomedir.md#constant-DEFAULT_RESOLVER_MONITOR
 AgentsHomedir.VERSION,Constant,AgentsHomedir.md#constant-VERSION
