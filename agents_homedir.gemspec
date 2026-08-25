@@ -12,7 +12,8 @@ Gem::Specification.new do |spec|
   spec.email         = ["lucian@ghinda.com"]
 
   spec.summary       = "Resolve home directories for AI coding agents."
-  spec.description   = "Helpers for resolving and normalizing home directories used by AI coding agents."
+  spec.description   = "DEPRECATED: renamed to agent_homedir. Helpers for resolving and normalizing home directories used by AI coding agents."
+  spec.post_install_message = "agents_homedir has been renamed to agent_homedir: https://github.com/lucianghinda/agent_homedir"
   spec.homepage      = "https://github.com/lucianghinda/agents_homedir"
   spec.license       = "MIT"
   spec.required_ruby_version = ">= 3.2"

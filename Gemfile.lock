@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    agents_homedir (0.2.0)
+    agents_homedir (0.2.1)
       zeitwerk (~> 2.8)
 
 GEM
@@ -41,7 +41,7 @@ DEPENDENCIES
   yard-markdown (~> 0.9)
 
 CHECKSUMS
-  agents_homedir (0.2.0)
+  agents_homedir (0.2.1)
   bundler (4.0.12) sha256=7f8b757d28dfb636e7b24fba2344ac6dd13b5b24f4b46d62573d483f211825ac
   csv (3.3.6) sha256=aba61e7e507a66f03d45cb1f3c4b6359861c3504038b422962875dce099e4456
   date (3.5.1) sha256=750d06384d7b9c15d562c76291407d89e368dda4d4fff957eb94962d325a0dc0

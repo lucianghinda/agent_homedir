@@ -38,8 +38,10 @@ class PackagingTest < Minitest::Test
     spec = Gem::Specification.load(File.expand_path("../agents_homedir.gemspec", __dir__))
 
     assert_equal "agents_homedir", spec.name
-    assert_equal "0.2.0", spec.version.to_s
+    assert_equal "0.2.1", spec.version.to_s
     assert_equal "Resolve home directories for AI coding agents.", spec.summary
+    assert_equal "DEPRECATED: renamed to agent_homedir. Helpers for resolving and normalizing home directories used by AI coding agents.", spec.description
+    assert_equal "agents_homedir has been renamed to agent_homedir: https://github.com/lucianghinda/agent_homedir", spec.post_install_message
     assert_equal "MIT", spec.license
     assert_equal "https://github.com/lucianghinda/agents_homedir", spec.homepage
     assert_equal ">= 3.2", spec.required_ruby_version.to_s
